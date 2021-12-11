@@ -1,6 +1,6 @@
 {
 
-    "name": "oat-sa/extension-tao-ltideliveryprovider",
+    "name": "openthinklabs/extension-tao-ltideliveryprovider",
     "description" : "extension to manage LTI delivery provider for TAO",
     "type" : "tao-extension",
     "authors" : [
