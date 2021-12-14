@@ -60,15 +60,53 @@
 	        }
     },
     "minimum-stability" : "dev",
+    "repositories": [
+		{
+		  "type": "vcs",
+		  "url": "git@github.com:openthinklabs/oatbox-extension-installer.git"
+		},
+		{
+		  "type": "vcs",
+		  "url": "git@github.com:openthinklabs/generis.git"
+		},		
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/tao-core.git"
+		},		
+		{
+		  "type": "vcs",
+		  "url": "git@github.com:openthinklabs/extension-tao-delivery.git"
+		},        
+		{
+		  "type": "vcs",
+		  "url": "git@github.com:openthinklabs/extension-tao-delivery-rdf.git"
+		},
+		{
+		  "type": "vcs",
+		  "url": "git@github.com:openthinklabs/extension-tao-lti.git"
+		},
+		{
+		  "type": "vcs",
+		  "url": "git@github.com:openthinklabs/extension-tao-outcomeui.git"
+		},
+		{
+		  "type": "vcs",
+		  "url": "git@github.com:openthinklabs/extension-tao-testqti.git"
+		},
+		{
+		  "type": "vcs",
+		  "url": "git@github.com:openthinklabs/extension-tao-outcome.git"
+		}								          
+	],     	
     "require": {
-        "oat-sa/oatbox-extension-installer": "~1.1||dev-master",
-		"oat-sa/generis" : ">=14.0.0",
-		"oat-sa/tao-core" : ">=48.56.0",
-		"oat-sa/extension-tao-delivery" : ">=15.8.0",
-		"oat-sa/extension-tao-delivery-rdf" : ">=14.0.0",
-		"oat-sa/extension-tao-lti" : ">=15.2.0",
-		"oat-sa/extension-tao-outcomeui" : ">=10.0.0",
-		"oat-sa/extension-tao-testqti" : ">=41.17.0",
-		"oat-sa/extension-tao-outcome" : ">=13.0.0"
+        "openthinklabs/oatbox-extension-installer": "~1.1||dev-master",
+		"openthinklabs/generis" : ">=14.0.0",
+		"openthinklabs/tao-core" : ">=48.56.0",
+		"openthinklabs/extension-tao-delivery" : ">=15.8.0",
+		"openthinklabs/extension-tao-delivery-rdf" : ">=14.0.0",
+		"openthinklabs/extension-tao-lti" : ">=15.2.0",
+		"openthinklabs/extension-tao-outcomeui" : ">=10.0.0",
+		"openthinklabs/extension-tao-testqti" : ">=41.17.0",
+		"openthinklabs/extension-tao-outcome" : ">=13.0.0"
 	}
 }
