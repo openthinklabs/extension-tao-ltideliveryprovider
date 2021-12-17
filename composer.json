@@ -106,7 +106,7 @@
 		"openthinklabs/extension-tao-delivery-rdf" : ">=14.0.0",
 		"openthinklabs/extension-tao-lti" : ">=15.2.0",
 		"openthinklabs/extension-tao-outcomeui" : ">=10.0.0",
-		"openthinklabs/extension-tao-testqti" : ">=41.17.0",
+		"openthinklabs/extension-tao-testqti" : ">=42.2.0",
 		"openthinklabs/extension-tao-outcome" : ">=13.0.0"
 	}
 }
