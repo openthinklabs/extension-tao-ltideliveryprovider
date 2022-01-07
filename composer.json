@@ -96,17 +96,38 @@
 		{
 		  "type": "vcs",
 		  "url": "git@github.com:openthinklabs/extension-tao-outcome.git"
-		}								          
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/lib-generis-search.git"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/jig.git"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/composer-npm-bridge.git"
+		}                                                   														          
 	],     	
     "require": {
         "openthinklabs/oatbox-extension-installer": "~1.1||dev-master",
-		"openthinklabs/generis" : ">=14.0.0",
-		"openthinklabs/tao-core" : ">=48.56.0",
+		"openthinklabs/generis" : "15.13.1.4",
+		"openthinklabs/tao-core" : "48.75.0.6",
 		"openthinklabs/extension-tao-delivery" : ">=15.8.0",
 		"openthinklabs/extension-tao-delivery-rdf" : ">=14.0.0",
 		"openthinklabs/extension-tao-lti" : ">=15.2.0",
 		"openthinklabs/extension-tao-outcomeui" : ">=10.0.0",
 		"openthinklabs/extension-tao-testqti" : ">=42.2.0",
 		"openthinklabs/extension-tao-outcome" : ">=13.0.0"
-	}
+	},
+    "config": {
+        "allow-plugins": {
+            "oat-sa/composer-npm-bridge": true,
+            "oat-sa/oatbox-extension-installer": true,
+            "composer/package-versions-deprecated": true,
+            "openthinklabs/oatbox-extension-installer": true,
+            "openthinklabs/composer-npm-bridge": true
+        }
+    }
 }
