@@ -1,6 +1,6 @@
 {
 
-    "name": "oat-sa/extension-tao-ltideliveryprovider",
+    "name": "openthinklabs/extension-tao-ltideliveryprovider",
     "description" : "extension to manage LTI delivery provider for TAO",
     "type" : "tao-extension",
     "authors" : [
@@ -60,15 +60,124 @@
 	        }
     },
     "minimum-stability" : "dev",
+	"repositories": [
+		{
+		  "type": "vcs",
+		  "url": "git@github.com:openthinklabs/oatbox-extension-installer.git"
+		},
+		{
+		  "type": "vcs",
+		  "url": "git@github.com:openthinklabs/generis.git"
+		},		
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/tao-core.git"
+		},		
+		{
+		  "type": "vcs",
+		  "url": "git@github.com:openthinklabs/extension-tao-delivery.git"
+		},        
+		{
+		  "type": "vcs",
+		  "url": "git@github.com:openthinklabs/extension-tao-delivery-rdf.git"
+		},
+		{
+		  "type": "vcs",
+		  "url": "git@github.com:openthinklabs/extension-tao-lti.git"
+		},
+		{
+		  "type": "vcs",
+		  "url": "git@github.com:openthinklabs/extension-tao-outcomeui.git"
+		},
+		{
+		  "type": "vcs",
+		  "url": "git@github.com:openthinklabs/extension-tao-testqti.git"
+		},
+		{
+		  "type": "vcs",
+		  "url": "git@github.com:openthinklabs/extension-tao-outcome.git"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/extension-tao-group.git"
+		},		
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/extension-tao-item.git"
+		},				
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/extension-tao-itemqti.git"
+		},						
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/extension-tao-test.git"
+		},						
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/extension-tao-testtaker.git"
+		},								
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/extension-tao-backoffice.git"
+		},		
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/lib-generis-search.git"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/lib-lti1p3-ags.git"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/lib-test-cat.git"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/lib-lti1p3-core.git"
+		},				
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/lib-tao-dtms.git"
+		},	
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/lib-tao-qti.git"
+		},								
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/lib-beeme.git"
+		},								
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/jig.git"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/qti-sdk.git"
+		},		
+		{
+			"type": "vcs",
+			"url": "git@github.com:openthinklabs/composer-npm-bridge.git"
+		}                                                   														          
+	],     		
     "require": {
-        "oat-sa/oatbox-extension-installer": "~1.1||dev-master",
-		"oat-sa/generis" : ">=14.0.0",
-		"oat-sa/tao-core" : ">=48.56.0",
-		"oat-sa/extension-tao-delivery" : ">=15.8.0",
-		"oat-sa/extension-tao-delivery-rdf" : ">=14.0.0",
-		"oat-sa/extension-tao-lti" : ">=15.2.0",
-		"oat-sa/extension-tao-outcomeui" : ">=10.0.0",
-		"oat-sa/extension-tao-testqti" : ">=41.17.0",
-		"oat-sa/extension-tao-outcome" : ">=13.0.0"
-	}
+        "openthinklabs/oatbox-extension-installer": "1.2.2",
+		"openthinklabs/generis" : "15.11.0.4",
+		"openthinklabs/tao-core" : "48.66.1.3",
+		"openthinklabs/extension-tao-delivery" : "15.8.1.4",
+		"openthinklabs/extension-tao-delivery-rdf" : "14.11.1.1",
+		"openthinklabs/extension-tao-lti" : "15.5.0.6",
+		"openthinklabs/extension-tao-outcomeui" : "11.0.3.2",
+		"openthinklabs/extension-tao-testqti" : "42.0.1.1",
+		"openthinklabs/extension-tao-outcome" : "13.1.0.4"
+	},
+    "config": {
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true,
+            "openthinklabs/oatbox-extension-installer": true,
+            "openthinklabs/composer-npm-bridge": true
+        }
+    }
 }
