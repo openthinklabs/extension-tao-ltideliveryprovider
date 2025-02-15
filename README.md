@@ -5,6 +5,7 @@
 ![GitHub](https://img.shields.io/github/license/oat-sa/extension-tao-ltideliveryprovider.svg)
 ![GitHub release](https://img.shields.io/github/release/oat-sa/extension-tao-ltideliveryprovider.svg)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/y/oat-sa/extension-tao-ltideliveryprovider.svg)
+[![codecov](https://codecov.io/gh/oat-sa/extension-tao-ltideliveryprovider/branch/master/graph/badge.svg)](https://codecov.io/gh/oat-sa/extension-tao-ltideliveryprovider)
 
 > The LTI Delivery extension allows test-takers to take a delivery (delivered test) via LTI
 
@@ -82,10 +83,6 @@ As a system administrator you also install it through the TAO Extension Manager:
 ## Configuration options
 
 ### Feature flags
-#### FEATURE_FLAG_MAINTAIN_RESTARTED_DELIVERY_EXECUTION_STATE
-A `bool`-typed environment variable, controlling whether a delivery execution state should be kept as is or reset each time it starts.
-- `"false"` – the state will be reset on each restart. Default behavior.
-- `"true"` – the state will be maintained upon a restart.
 #### FEATURE_FLAG_AGS_SCORE_SENDING_RETRY
 A `bool`-typed environment variable, controlling whether AGS score should be resent if it fails to be sent.
 - `"false"` – the application won't try to resend another request when it fails. Default behavior.

@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2013-2021 (original work) Open Assessment Technologies SA (under the project TAO-PRODUCT);
+ * Copyright (c) 2013-2024 (original work) Open Assessment Technologies SA (under the project TAO-PRODUCT);
  */
 
 namespace oat\ltiDeliveryProvider\controller;
@@ -30,15 +30,15 @@ use oat\ltiDeliveryProvider\model\LTIDeliveryTool;
 use oat\ltiDeliveryProvider\model\LtiLaunchDataService;
 use oat\ltiDeliveryProvider\model\navigation\LtiNavigationService;
 use oat\tao\model\actionQueue\ActionFullException;
-use oat\tao\model\featureFlag\FeatureFlagChecker;
+use oat\taoDelivery\model\Capacity\CapacityInterface;
 use oat\taoDelivery\model\execution\DeliveryExecution;
-use oat\taoDelivery\model\execution\StateServiceInterface;
 use oat\taoLti\controller\ToolModule;
 use oat\taoLti\models\classes\LtiException;
 use oat\taoLti\models\classes\LtiMessages\LtiErrorMessage;
 use oat\taoLti\models\classes\LtiRoles;
 use oat\taoLti\models\classes\LtiService;
 use oat\taoLti\models\classes\LtiVariableMissingException;
+use oat\taoQtiTest\model\Service\ConcurringSessionService;
 use oat\taoQtiTest\models\QtiTestExtractionFailedException;
 use tao_helpers_I18n;
 use tao_helpers_Uri;
@@ -48,33 +48,26 @@ use function GuzzleHttp\Psr7\stream_for;
 class DeliveryTool extends ToolModule
 {
     /**
-     * @var string Controls whether a delivery execution state should be kept as is or reset each time it starts.
-     *             `false` – the state will be reset on each restart.
-     *             `true` – the state will be maintained upon a restart.
-     */
-    public const FEATURE_FLAG_MAINTAIN_RESTARTED_DELIVERY_EXECUTION_STATE = 'FEATURE_FLAG_MAINTAIN_RESTARTED_DELIVERY_EXECUTION_STATE';
-
-    /**
      * Setting this parameter to 'true' will prevent resuming a testsession in progress
      * and will start a new testsession whenever the lti tool is launched
      *
      * @var string
      */
-    const PARAM_FORCE_RESTART = 'custom_force_restart';
+    public const PARAM_FORCE_RESTART = 'custom_force_restart';
     /**
      * Setting this parameter to 'true' will prevent the thank you screen to be shown after
      * the test and skip directly to the return url
      *
      * @var string
      */
-    const PARAM_SKIP_THANKYOU = 'custom_skip_thankyou';
+    public const PARAM_SKIP_THANKYOU = 'custom_skip_thankyou';
 
     /**
      * Setting this parameter to 'true' will prevent the 'You have already taken this test'
      * screen to be shown skip directly to the return url
      * @var string
      */
-    const PARAM_SKIP_OVERVIEW = 'custom_skip_overview';
+    public const PARAM_SKIP_OVERVIEW = 'custom_skip_overview';
 
     /**
      * Setting this parameter to a string will show this string as the title of the thankyou
@@ -82,7 +75,7 @@ class DeliveryTool extends ToolModule
      *
      * @var string
      */
-    const PARAM_THANKYOU_MESSAGE = 'custom_message';
+    public const PARAM_THANKYOU_MESSAGE = 'custom_message';
 
     /**
      * (non-PHPdoc)
@@ -99,6 +92,7 @@ class DeliveryTool extends ToolModule
     public function run()
     {
         $compiledDelivery = $this->getDelivery();
+
         if (is_null($compiledDelivery) || !$compiledDelivery->exists()) {
             if ($this->hasAccess(LinkConfiguration::class, 'configureDelivery')) {
                 // user authorised to select the Delivery
@@ -118,9 +112,9 @@ class DeliveryTool extends ToolModule
             }
 
             $user = $session->getUser();
+            $ltiRoles = [LtiRoles::CONTEXT_LEARNER, LtiRoles::CONTEXT_LTI1P3_LEARNER];
 
-            $isLearner = !is_null($user)
-                && count(array_intersect([LtiRoles::CONTEXT_LEARNER, LtiRoles::CONTEXT_LTI1P3_LEARNER], $user->getRoles())) > 0;
+            $isLearner = !is_null($user) && count(array_intersect($ltiRoles, $user->getRoles())) > 0;
 
             $isDryRun = !$isLearner && in_array(LtiRoles::CONTEXT_LTI1P3_INSTRUCTOR, $user->getRoles(), true);
 
@@ -128,8 +122,7 @@ class DeliveryTool extends ToolModule
                 if ($this->hasAccess(DeliveryRunner::class, 'runDeliveryExecution')) {
                     try {
                         $activeExecution = $this->getActiveDeliveryExecution($compiledDelivery);
-
-                        $this->resetDeliveryExecutionState($activeExecution);
+                        $this->getConcurringSessionService()->pauseActiveDeliveryExecutionsForUser($activeExecution);
                         $this->redirect($this->getLearnerUrl($compiledDelivery, $activeExecution));
                     } catch (QtiTestExtractionFailedException $e) {
                         common_Logger::i($e->getMessage());
@@ -145,7 +138,16 @@ class DeliveryTool extends ToolModule
                     $this->returnError(__('Access to this functionality is restricted'), false);
                 }
             } elseif ($this->hasAccess(LinkConfiguration::class, 'configureDelivery')) {
-                $this->redirect(_url('showDelivery', 'LinkConfiguration', null, ['uri' => $compiledDelivery->getUri()]));
+                $this->redirect(
+                    _url(
+                        'showDelivery',
+                        'LinkConfiguration',
+                        null,
+                        [
+                            'uri' => $compiledDelivery->getUri()
+                        ]
+                    )
+                );
             } else {
                 $this->returnError(__('Access to this functionality is restricted to students'), false);
             }
@@ -181,8 +183,8 @@ class DeliveryTool extends ToolModule
 
     public function checkCapacity()
     {
-        /** @var \oat\taoDelivery\model\Capacity\CapacityInterface $capacityService */
-        $capacityService = $this->getServiceLocator()->get(\oat\taoDelivery\model\Capacity\CapacityInterface::SERVICE_ID);
+        /** @var CapacityInterface $capacityService */
+        $capacityService = $this->getServiceLocator()->get(CapacityInterface::SERVICE_ID);
         $capacity = $capacityService->getCapacity();
         $payload = [
             'id' => '',
@@ -206,7 +208,7 @@ class DeliveryTool extends ToolModule
 
     /**
      * @param core_kernel_classes_Resource $delivery
-     * @param DeliveryExecution            $activeExecution
+     * @param DeliveryExecution|null $activeExecution
      *
      * @return string
      * @throws LtiException
@@ -221,7 +223,14 @@ class DeliveryTool extends ToolModule
         }
 
         if ($activeExecution !== null) {
-            return _url('runDeliveryExecution', 'DeliveryRunner', null, ['deliveryExecution' => $activeExecution->getIdentifier()]);
+            return _url(
+                'runDeliveryExecution',
+                'DeliveryRunner',
+                null,
+                [
+                    'deliveryExecution' => $activeExecution->getIdentifier()
+                ]
+            );
         }
 
         /** @var LtiAssignment $assignmentService */
@@ -236,7 +245,11 @@ class DeliveryTool extends ToolModule
 
         if ($user->getLaunchData()->hasVariable(self::PARAM_SKIP_OVERVIEW)) {
             $executionService = $this->getServiceLocator()->get(LtiDeliveryExecutionService::SERVICE_ID);
-            $executions = $executionService->getLinkedDeliveryExecutions($delivery, $currentSession->getLtiLinkResource(), $user->getIdentifier());
+            $executions = $executionService->getLinkedDeliveryExecutions(
+                $delivery,
+                $currentSession->getLtiLinkResource(),
+                $user->getIdentifier()
+            );
             $lastDE = end($executions);
             /** @var LtiNavigationService $ltiNavigationService */
             $ltiNavigationService = $this->getServiceLocator()->get(LtiNavigationService::SERVICE_ID);
@@ -250,17 +263,6 @@ class DeliveryTool extends ToolModule
             );
         }
         return $url;
-    }
-
-    /**
-     * @param core_kernel_classes_Resource $delivery
-     *
-     * @return mixed|null|DeliveryExecution
-     */
-    protected function getActiveDeliveryExecution(\core_kernel_classes_Resource $delivery)
-    {
-        $deliveryExecutionService = $this->getServiceLocator()->get(LtiDeliveryExecutionService::SERVICE_ID);
-        return $deliveryExecutionService->getActiveDeliveryExecution($delivery);
     }
 
     /**
@@ -297,6 +299,18 @@ class DeliveryTool extends ToolModule
         return $returnValue;
     }
 
+    /**
+     * @param core_kernel_classes_Resource $delivery
+     *
+     * @return mixed|null|DeliveryExecution
+     */
+    protected function getActiveDeliveryExecution(\core_kernel_classes_Resource $delivery)
+    {
+        return $this->getServiceLocator()
+            ->get(LtiDeliveryExecutionService::SERVICE_ID)
+            ->getActiveDeliveryExecution($delivery);
+    }
+
     private function configureI18n(): void
     {
         $extension = $this->getServiceLocator()
@@ -306,33 +320,8 @@ class DeliveryTool extends ToolModule
         tao_helpers_I18n::init($extension, DEFAULT_ANONYMOUS_INTERFACE_LANG);
     }
 
-    private function resetDeliveryExecutionState(DeliveryExecution $activeExecution = null): void
+    private function getConcurringSessionService(): ConcurringSessionService
     {
-        if (
-            null === $activeExecution
-            || !$this->isDeliveryExecutionStateResetEnabled()
-            || $activeExecution->getState()->getUri() === DeliveryExecution::STATE_PAUSED
-        ) {
-            return;
-        }
-
-        $this->getStateService()->pause($activeExecution);
-    }
-
-    private function isDeliveryExecutionStateResetEnabled(): bool
-    {
-        return !$this->getFeatureFlagChecker()->isEnabled(
-            static::FEATURE_FLAG_MAINTAIN_RESTARTED_DELIVERY_EXECUTION_STATE
-        );
-    }
-
-    private function getStateService(): StateServiceInterface
-    {
-        return $this->getPsrContainer()->get(StateServiceInterface::SERVICE_ID);
-    }
-
-    private function getFeatureFlagChecker(): FeatureFlagChecker
-    {
-        return $this->getPsrContainer()->get(FeatureFlagChecker::class);
+        return $this->getPsrContainer()->get(ConcurringSessionService::class);
     }
 }

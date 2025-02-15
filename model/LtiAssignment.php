@@ -49,14 +49,14 @@ class LtiAssignment extends ConfigurableService
     use OntologyAwareTrait;
     use LoggerAwareTrait;
 
-    const LTI_MAX_ATTEMPTS_VARIABLE = 'custom_max_attempts';
+    public const LTI_MAX_ATTEMPTS_VARIABLE = 'custom_max_attempts';
 
     /**
      * @deprecated Use LtiAssignmentAuthorizationService::SERVICE_ID instead
      */
-    const LTI_SERVICE_ID = 'ltiDeliveryProvider/assignment';
+    public const LTI_SERVICE_ID = 'ltiDeliveryProvider/assignment';
 
-    const SERVICE_ID = 'ltiDeliveryProvider/assignment';
+    public const SERVICE_ID = 'ltiDeliveryProvider/assignment';
 
     /**
      * @param string $deliveryIdentifier
@@ -85,7 +85,7 @@ class LtiAssignment extends ConfigurableService
     protected function verifyToken(KernelResource $delivery, User $user)
     {
         $propMaxExec = $delivery->getOnePropertyValue($this->getProperty(DeliveryContainerService::PROPERTY_MAX_EXEC));
-        $maxExec = is_null($propMaxExec) ? 0 : $propMaxExec->literal;
+        $maxExec = is_null($propMaxExec) ? 0 : (int) $propMaxExec->literal;
 
         $currentSession = $this->getServiceLocator()->get(SessionService::SERVICE_ID)->getCurrentSession();
 
@@ -119,13 +119,13 @@ class LtiAssignment extends ConfigurableService
 
     private function verifyAvailabilityFrame(KernelResource $delivery): void
     {
-        @[[$scheduledStartTimeProperty], [$scheduledEndTimeProperty]] = array_values($delivery->getPropertiesValues(
-            [
-                $this->getProperty(DeliveryAssemblyService::PROPERTY_START),
-                $this->getProperty(DeliveryAssemblyService::PROPERTY_END),
-            ]
-        ));
-
+        $this->logInfo("Verify availability frame for delivery {$delivery->getUri()}");
+        $scheduledStartTimeProperty = $delivery->getOnePropertyValue(
+            $this->getProperty(DeliveryAssemblyService::PROPERTY_START)
+        );
+        $scheduledEndTimeProperty = $delivery->getOnePropertyValue(
+            $this->getProperty(DeliveryAssemblyService::PROPERTY_END)
+        );
         $scheduledStartTime = (int)(string)$scheduledStartTimeProperty ?: 0;
         $scheduledEndTime = (int)(string)$scheduledEndTimeProperty ?: PHP_INT_MAX;
 
