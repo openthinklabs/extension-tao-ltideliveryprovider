@@ -37,7 +37,7 @@ class SendLtiOutcomeTask extends AbstractAction
 {
     use LoggerAwareTrait;
 
-    public const VARIABLE_IDENTIFIER = 'LtiOutcome';
+    const VARIABLE_IDENTIFIER = 'LtiOutcome';
 
     public function __invoke($params)
     {
@@ -52,10 +52,7 @@ class SendLtiOutcomeTask extends AbstractAction
             $implementation = $resultsService->getReadableImplementation($deliveryExecution->getDelivery());
             $resultsService->setImplementation($implementation);
 
-            $variables = $resultsService->getVariableDataFromDeliveryResult(
-                $deliveryResultIdentifier,
-                [taoResultServer_models_classes_OutcomeVariable::class]
-            );
+            $variables = $resultsService->getVariableDataFromDeliveryResult($deliveryResultIdentifier, [taoResultServer_models_classes_OutcomeVariable::class]);
 
             $submitted = 0;
             /** @var taoResultServer_models_classes_OutcomeVariable $variable */
@@ -67,9 +64,7 @@ class SendLtiOutcomeTask extends AbstractAction
                 }
             }
             if (0 === $submitted) {
-                throw new \common_Exception(
-                    'No LTI Outcome has been submitter for execution' . $deliveryResultIdentifier
-                );
+                throw new \common_Exception('No LTI Outcome has been submitter for execution' . $deliveryResultIdentifier);
             }
         } catch (\Exception $exception) {
             $report->setMessage($exception->getMessage());
@@ -88,26 +83,16 @@ class SendLtiOutcomeTask extends AbstractAction
      * @throws \common_exception_Error
      * @throws \oat\taoLti\models\classes\LtiException
      */
-    private function sendLtiOutcome(
-        taoResultServer_models_classes_OutcomeVariable $testVariable,
-        $deliveryResultIdentifier,
-        $consumerKey,
-        $serviceUrl
-    ) {
+    private function sendLtiOutcome(taoResultServer_models_classes_OutcomeVariable $testVariable, $deliveryResultIdentifier, $consumerKey, $serviceUrl)
+    {
         $grade = (string)$testVariable->getValue();
 
         /** @var ResultAliasServiceInterface $resultAliasService */
         $resultAliasService = $this->getServiceLocator()->get(ResultAliasServiceInterface::SERVICE_ID);
         $deliveryResultAlias = $resultAliasService->getResultAlias($deliveryResultIdentifier);
-        $deliveryResultIdentifier = empty($deliveryResultAlias)
-            ? $deliveryResultIdentifier
-            : current($deliveryResultAlias);
+        $deliveryResultIdentifier = empty($deliveryResultAlias) ? $deliveryResultIdentifier : current($deliveryResultAlias);
 
-        $message = $this->getLtiOutcomeXmlFactory()->buildReplaceResultRequest(
-            $deliveryResultIdentifier,
-            $grade,
-            uniqid('', true)
-        );
+        $message = $this->getLtiOutcomeXmlFactory()->buildReplaceResultRequest($deliveryResultIdentifier, $grade, uniqid('', true));
 
         $credentialResource = LtiService::singleton()->getCredential($consumerKey);
         $credentials = new \tao_models_classes_oauth_Credentials($credentialResource);
@@ -119,7 +104,7 @@ class SendLtiOutcomeTask extends AbstractAction
         //Hack for moodle compatibility, the header is ignored for the signature computation
         $signedRequest->setHeader("Content-Type", "application/xml");
 
-        $response = $signedRequest->send(true);
+        $response = $signedRequest->send();
 
         if ('200' != $response->httpCode) {
             $this->logWarning("Request sent (Body)\n" . $signedRequest->getBody() . "\n");
@@ -129,9 +114,7 @@ class SendLtiOutcomeTask extends AbstractAction
             $this->logWarning("\nHTTP From: " . $response->effectiveUrl . "\n");
             $this->logWarning("\nHTTP Content received: " . $response->responseData . "\n");
 
-            throw new \common_exception_Error(
-                'An HTTP level problem occurred when sending the outcome to the service url'
-            );
+            throw new \common_exception_Error('An HTTP level problem occurred when sending the outcome to the service url');
         } else {
             $this->logInfo('Submited LTI score with id "' . $deliveryResultIdentifier . '"');
         }

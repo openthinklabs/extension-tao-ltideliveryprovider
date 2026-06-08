@@ -32,6 +32,7 @@ use stdClass;
 
 class BuildE2eConfiguration extends AbstractAction
 {
+
     public function __invoke($params)
     {
         if (!$this->getExtensionManager()->isEnabled('ltiDeliveryProvider')) {
@@ -101,4 +102,5 @@ class BuildE2eConfiguration extends AbstractAction
     {
         $this->getE2eConfigDriver()->setConfigPath((new PrepareEnvironment())->getConfigPath())->append($config);
     }
+
 }

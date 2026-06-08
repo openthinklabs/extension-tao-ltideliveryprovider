@@ -31,6 +31,8 @@ use oat\ltiDeliveryProvider\model\execution\LTIDeliveryExecutionLink;
  */
 class KvLTIDeliveryExecutionLink implements LTIDeliveryExecutionLink, \JsonSerializable
 {
+
+
     private $userId;
     private $deliveryExecutionId;
     private $linkId;

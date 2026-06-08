@@ -1,5 +1,8 @@
 <?php
 
+use oat\ltiDeliveryProvider\model\navigation\LtiNavigationService;
+use oat\ltiDeliveryProvider\model\navigation\DefaultMessageFactory;
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,12 +21,8 @@
  * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
  */
 
-use oat\ltiDeliveryProvider\model\navigation\LtiNavigationService;
-use oat\ltiDeliveryProvider\model\navigation\DefaultMessageFactory;
-
 return new LtiNavigationService([
     LtiNavigationService::OPTION_THANK_YOU_SCREEN       => false,
     LtiNavigationService::OPTION_DELIVERY_RETURN_STATUS => false,
-    LtiNavigationService::OPTION_MESSAGE_FACTORY        => new DefaultMessageFactory(),
-    LtiNavigationService::OPTION_RETURN_URL_IDENTIFIER  => false,
+    LtiNavigationService::OPTION_MESSAGE_FACTORY        => new DefaultMessageFactory()
 ]);

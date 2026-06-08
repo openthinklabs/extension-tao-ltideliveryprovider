@@ -19,7 +19,6 @@
  *
  * @author Sergei Mikhailov <sergei.mikhailov@taotesting.com>
  */
-
 declare(strict_types=1);
 
 namespace oat\ltiDeliveryProvider\test\unit\model\options\DataAccess\Repository;

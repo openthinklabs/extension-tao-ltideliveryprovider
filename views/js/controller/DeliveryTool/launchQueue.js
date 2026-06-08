@@ -18,10 +18,11 @@
  */
 
 define([
+    'lodash',
     'module',
     'core/polling',
     'core/request',
-], function (module, polling, request) {
+], function (_, module, polling, request) {
     'use strict';
 
     const _defaultConfig = {
@@ -34,11 +35,7 @@ define([
     return {
         start() {
             const { relaunchConfig = {} } = module.config();
-            const {
-                capacityCheckUrl = _defaultConfig.capacityCheckUrl,
-                relaunchInterval = _defaultConfig.relaunchInterval,
-                runUrl = _defaultConfig.runUrl
-            } = relaunchConfig;
+            const { capacityCheckUrl, relaunchInterval, runUrl } = _.defaults(relaunchConfig, _defaultConfig);
 
             polling({
                 action: function () {

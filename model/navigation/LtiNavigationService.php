@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2018-2023 (original work) Open Assessment Technologies SA.
+ * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
  *
  */
 
@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace oat\ltiDeliveryProvider\model\navigation;
 
-use oat\ltiDeliveryProvider\model\navigation\Command\GenerateReturnUrlCommand;
 use oat\oatbox\service\ConfigurableService;
 use oat\oatbox\service\exception\InvalidService;
 use oat\oatbox\service\exception\InvalidServiceManagerException;
@@ -40,40 +39,27 @@ class LtiNavigationService extends ConfigurableService
 
     public const OPTION_DELIVERY_RETURN_STATUS = 'delivery_return_status';
     public const OPTION_MESSAGE_FACTORY = 'message';
-    public const OPTION_RETURN_URL_IDENTIFIER = 'returnUrlId';
 
     /**
      * Whenever or not the thank you screen should be shown by default
      */
     public const OPTION_THANK_YOU_SCREEN = 'thankyouScreen';
 
+
     /**
-     * @deprecated Please use "generateReturnUrl"
+     * @param LtiLaunchData $launchData
+     * @param DeliveryExecutionInterface $deliveryExecution
+     * @return string
+     * @throws \common_exception_NotFound
+     * @throws InvalidService
+     * @throws InvalidServiceManagerException
+     * @throws LtiException
      */
     public function getReturnUrl(LtiLaunchData $launchData, DeliveryExecutionInterface $deliveryExecution): string
     {
-        return $this->generateReturnUrl(new GenerateReturnUrlCommand($launchData, $deliveryExecution));
-    }
-
-    public function generateReturnUrl(GenerateReturnUrlCommand $command): string
-    {
-        if ($command->isCustomFeedback()) {
-            return $this->getUrlHelper()->buildUrl(
-                'feedback',
-                'DeliveryRunner',
-                'ltiDeliveryProvider',
-                array_merge(
-                    [
-                        'deliveryExecution' => $command->getDeliveryExecution()->getIdentifier(),
-                    ],
-                    $command->getQueryStringData()
-                )
-            );
-        }
-
-        return $this->shouldShowThankYou($command->getLaunchData())
+        return $this->shouldShowThankYou($launchData)
             ? $this->buildThankYouUrl()
-            : $this->buildConsumerReturnUrl($command->getLaunchData(), $command->getDeliveryExecution());
+            : $this->buildConsumerReturnUrl($launchData, $deliveryExecution);
     }
 
     /**
@@ -108,11 +94,8 @@ class LtiNavigationService extends ConfigurableService
     {
         $ltiReturnQueryParams = $this->getLtiReturnUrlQueryParams($deliveryExecution);
         $deliveryReturnQueryParams = $this->getDeliveryReturnQueryParams($deliveryExecution);
-        $returnUrlIdParams = [];
-        if ($this->getOption(self::OPTION_RETURN_URL_IDENTIFIER)) {
-            $returnUrlIdParams = $this->getReturnUrlIdParams();
-        }
-        return array_merge($ltiReturnQueryParams, $deliveryReturnQueryParams, $returnUrlIdParams);
+
+        return array_merge($ltiReturnQueryParams, $deliveryReturnQueryParams);
     }
 
     /**
@@ -145,7 +128,7 @@ class LtiNavigationService extends ConfigurableService
      */
     protected function buildThankYouUrl(): string
     {
-        return $this->getUrlHelper()->buildUrl('thankYou', 'DeliveryRunner', 'ltiDeliveryProvider');
+        return $this->getServiceLocator()->get(UrlHelper::class)->buildUrl('thankYou', 'DeliveryRunner', 'ltiDeliveryProvider');
     }
 
     /**
@@ -192,19 +175,5 @@ class LtiNavigationService extends ConfigurableService
         }
 
         return $params;
-    }
-
-    /**
-     * @return array
-     * @throws \Exception
-     */
-    private function getReturnUrlIdParams(): array
-    {
-        return ['returnUrlId' => \helpers_Random::generateString(10)];
-    }
-
-    private function getUrlHelper(): UrlHelper
-    {
-        return $this->getServiceLocator()->get(UrlHelper::class);
     }
 }

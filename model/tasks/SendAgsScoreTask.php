@@ -42,12 +42,14 @@ class SendAgsScoreTask extends AbstractAction
     public const RETRY_COUNT = 'retryCount';
     public const RETRY_MAX = 'retryMax';
 
-    private array $params = [self::RETRY_COUNT => 0];
+    /** @var array */
+    private $params = [self::RETRY_COUNT => 0];
 
     public function __invoke($params): Report
     {
         $this->params = array_merge($this->params, $params);
-        $this->getLogger()->info('Start AGS score sending task:' . print_r($params, true));
+
+        $this->getLogger()->info('Start AGS score sending task', $params);
 
         try {
             $this->validateParams($params);
@@ -56,7 +58,6 @@ class SendAgsScoreTask extends AbstractAction
         }
 
         $registrationId = $params['registrationId'];
-        $deliveryExecutionId = $params['deliveryExecutionId'] ?? 'not passed to sender task';
         $agsClaim = AgsClaim::denormalize($params['agsClaim']);
         $data = $params['data'];
 
@@ -74,7 +75,7 @@ class SendAgsScoreTask extends AbstractAction
         try {
             $agsScoreService->send($registration, $agsClaim, $data);
         } catch (LtiAgsException $e) {
-            $this->retryTask($e, $deliveryExecutionId);
+            $this->retryTask($e);
 
             return $this->reportError($e->getMessage());
         }
@@ -90,10 +91,6 @@ class SendAgsScoreTask extends AbstractAction
             throw new InvalidArgumentException('Parameter "registrationId" must be a string');
         }
 
-        if (isset($params['deliveryExecutionId']) && !is_string($params['deliveryExecutionId'])) {
-            throw new InvalidArgumentException('Parameter "deliveryExecutionId" must be a string');
-        }
-
         if (!is_array($params['agsClaim'] ?? null) || !is_array($params['agsClaim']['scope'] ?? null)) {
             throw new InvalidArgumentException('Parameter "agsClaim" must be an array and include "scope" as an array');
         }
@@ -103,7 +100,7 @@ class SendAgsScoreTask extends AbstractAction
         }
     }
 
-    private function retryTask(LtiAgsException $exception, string $deliveryExecutionId): void
+    private function retryTask(LtiAgsException $exception): void
     {
         if (!$this->isRetryEnabled()) {
             $this->logNotice('Retry is disabled');
@@ -118,7 +115,6 @@ class SendAgsScoreTask extends AbstractAction
                     'agsClaim' => $exception->getAgsClaim()->normalize(),
                     'score' => json_encode($exception->getScore()),
                     'registration' => $exception->getRegistration()->getIdentifier(),
-                    'deliveryExecution' => $deliveryExecutionId
                 ]
             );
 
@@ -126,7 +122,7 @@ class SendAgsScoreTask extends AbstractAction
         }
 
         $this->increaseRetryCount();
-        $this->getQueueDispatcher()->createTask(new self(), $this->params);
+        $this->getQueueDispatcher()->createTask(new self, $this->params);
         $this->logInfo('AGS Score message has been rescheduled for another try');
     }
 

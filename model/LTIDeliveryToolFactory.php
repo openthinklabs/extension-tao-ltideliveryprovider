@@ -25,7 +25,7 @@ use oat\oatbox\service\ConfigurableService;
 
 class LTIDeliveryToolFactory extends ConfigurableService
 {
-    public const SERVICE_ID = 'ltiDeliveryProvider/LTIDeliveryToolFactory';
+    const SERVICE_ID = 'ltiDeliveryProvider/LTIDeliveryToolFactory';
 
     public function create()
     {

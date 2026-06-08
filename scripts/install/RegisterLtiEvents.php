@@ -26,8 +26,7 @@ namespace oat\ltiDeliveryProvider\scripts\install;
 use oat\ltiDeliveryProvider\model\events\LtiAgsListener;
 use oat\oatbox\extension\InstallAction;
 use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionCreated;
-use oat\taoQtiTest\models\event\DeliveryExecutionFinish;
-use oat\taoResultServer\models\Events\DeliveryExecutionResultsRecalculated;
+use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionState;
 
 class RegisterLtiEvents extends InstallAction
 {
@@ -39,12 +38,8 @@ class RegisterLtiEvents extends InstallAction
         );
 
         $this->registerEvent(
-            DeliveryExecutionResultsRecalculated::class,
-            [LtiAgsListener::class, 'onDeliveryExecutionResultsRecalculated']
-        );
-        $this->registerEvent(
-            DeliveryExecutionFinish::class,
-            [LtiAgsListener::class, 'onDeliveryExecutionFinish']
+            DeliveryExecutionState::class,
+            [LtiAgsListener::class, 'onDeliveryExecutionStateUpdate']
         );
     }
 }

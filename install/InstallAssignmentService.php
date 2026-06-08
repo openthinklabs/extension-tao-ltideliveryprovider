@@ -25,6 +25,7 @@ use oat\ltiDeliveryProvider\model\LtiAssignment;
 
 class InstallAssignmentService extends \oat\oatbox\extension\InstallAction
 {
+
     /**
      * @param $params
      */

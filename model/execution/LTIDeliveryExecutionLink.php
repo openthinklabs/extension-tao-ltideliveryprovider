@@ -29,4 +29,7 @@ namespace oat\ltiDeliveryProvider\model\execution;
  */
 interface LTIDeliveryExecutionLink
 {
+
+
+
 }

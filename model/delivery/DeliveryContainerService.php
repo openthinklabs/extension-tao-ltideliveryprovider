@@ -35,9 +35,9 @@ use oat\taoLti\models\classes\TaoLtiSession;
  */
 class DeliveryContainerService extends DeliveryRdfContainerService
 {
-    public const CUSTOM_LTI_SECURE = 'custom_secure';
+    const CUSTOM_LTI_SECURE = 'custom_secure';
 
-    public const CUSTOM_LTI_TAO_FEATURES = 'custom_x_tao_features';
+    const CUSTOM_LTI_TAO_FEATURES = 'custom_x_tao_features';
 
     /**
      * Validate and prepare launch variables
@@ -104,8 +104,7 @@ class DeliveryContainerService extends DeliveryRdfContainerService
      * @param LtiLaunchData $launchData
      * @return array
      */
-    private function getLtiFeaturesList(LtiLaunchData $launchData)
-    {
+    private function getLtiFeaturesList(LtiLaunchData $launchData) {
         $ltiFeatures = [];
         try {
             if (!$launchData->hasVariable(self::CUSTOM_LTI_TAO_FEATURES)) {

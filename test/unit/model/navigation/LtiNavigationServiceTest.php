@@ -112,11 +112,7 @@ class LtiNavigationServiceTest extends TestCase
 
         $result = $this->object->getReturnUrl($this->launchDataMock, $this->deliveryExecutionMock);
 
-        static::assertSame(
-            self::THANK_YOU_URL,
-            $result,
-            'Returned url must be as expected for request without return url.'
-        );
+        static::assertSame(self::THANK_YOU_URL, $result, 'Returned url must be as expected for request without return url.');
     }
 
     /**
@@ -221,8 +217,7 @@ class LtiNavigationServiceTest extends TestCase
             'Option show thank you screen false, LTIReturnUrl has query parameter' => [
                 'thankYouScreenOption' => false,
                 'ltiReturnUrl' => 'http://FAKE_LTI_RETURN.URL?lti_param1=lti_value1',
-                'expectedUrl' => 'http://FAKE_LTI_RETURN.URL?lti_param1=lti_value1&deliveryExecution='
-                    . self::DELIVERY_EXECUTION_ID,
+                'expectedUrl' => 'http://FAKE_LTI_RETURN.URL?lti_param1=lti_value1&deliveryExecution=' . self::DELIVERY_EXECUTION_ID
             ]
         ];
     }

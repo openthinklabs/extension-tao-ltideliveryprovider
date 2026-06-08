@@ -22,6 +22,9 @@
 namespace oat\ltiDeliveryProvider\model\execution\implementation;
 
 use oat\ltiDeliveryProvider\model\execution\LtiDeliveryExecutionService as LtiDeliveryExecutionServiceInterface;
+use oat\tao\model\search\tasks\AddSearchIndex;
+use oat\tao\model\search\tasks\AddSearchIndexFromArray;
+use oat\tao\model\taskQueue\QueueDispatcherInterface;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionState;
@@ -38,10 +41,10 @@ use oat\tao\model\search\Search;
  * @author Antoine Robin, <antoine@taotesting.com>
  * @package oat\ltiDeliveryProvider\model\execution
  */
-abstract class AbstractLtiDeliveryExecutionService extends ConfigurableService implements
-    LtiDeliveryExecutionServiceInterface
+abstract class AbstractLtiDeliveryExecutionService extends ConfigurableService implements LtiDeliveryExecutionServiceInterface
 {
-    public const OPTION_QUEUE_PERSISTENCE = 'queue_persistence';
+
+    const OPTION_QUEUE_PERSISTENCE = 'queue_persistence';
 
     /**
      * @inheritdoc
@@ -105,10 +108,6 @@ abstract class AbstractLtiDeliveryExecutionService extends ConfigurableService i
     protected function getPersistence()
     {
         $persistenceId = $this->getOption(self::OPTION_QUEUE_PERSISTENCE);
-
-        return $this
-            ->getServiceManager()
-            ->get(\common_persistence_Manager::SERVICE_ID)
-            ->getPersistenceById($persistenceId);
+        return $this->getServiceManager()->get(\common_persistence_Manager::SERVICE_ID)->getPersistenceById($persistenceId);
     }
 }

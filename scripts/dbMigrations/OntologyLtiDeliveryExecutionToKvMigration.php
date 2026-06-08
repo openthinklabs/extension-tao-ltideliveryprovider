@@ -26,9 +26,7 @@ use oat\ltiDeliveryProvider\model\execution\implementation\KvLtiDeliveryExecutio
 use oat\ltiDeliveryProvider\model\execution\implementation\OntologyLTIDeliveryExecutionLink;
 use oat\oatbox\extension\script\ScriptAction;
 use oat\ltiDeliveryProvider\model\execution\LtiDeliveryExecutionService;
-// phpcs:disable Generic.Files.LineLength
 use oat\ltiDeliveryProvider\model\execution\implementation\LtiDeliveryExecutionService as OntologyDeliveryExecutionService;
-// phpcs:enable Generic.Files.LineLength
 use oat\oatbox\log\LoggerAggregator;
 use oat\oatbox\log\VerboseLoggerFactory;
 
@@ -58,11 +56,7 @@ class OntologyLtiDeliveryExecutionToKvMigration extends ScriptAction
             $ltiDeliveryExecution = $this->getServiceLocator()->get(LtiDeliveryExecutionService::SERVICE_ID);
 
             if (!$ltiDeliveryExecution instanceof OntologyDeliveryExecutionService) {
-                return new \common_report_Report(
-                    \common_report_Report::TYPE_ERROR,
-                    ' LtiDeliveryExecution migration must be done on a Ontology Service e.q. '
-                        . 'LtiDeliveryExecutionService.'
-                );
+                return new \common_report_Report(\common_report_Report::TYPE_ERROR, ' LtiDeliveryExecution migration must be done on a Ontology Service e.q. LtiDeliveryExecutionService.');
             }
 
             $kvDeliveryExecutionService = new KvLtiDeliveryExecutionService([
@@ -83,25 +77,14 @@ class OntologyLtiDeliveryExecutionToKvMigration extends ScriptAction
                     OntologyLTIDeliveryExecutionLink::PROPERTY_LTI_DEL_EXEC_LINK_EXEC_ID,
                 ]);
 
-                $user = $this->getPropertyValue(
-                    $properties,
-                    OntologyLTIDeliveryExecutionLink::PROPERTY_LTI_DEL_EXEC_LINK_USER
-                );
-                $link = $this->getPropertyValue(
-                    $properties,
-                    OntologyLTIDeliveryExecutionLink::PROPERTY_LTI_DEL_EXEC_LINK_LINK
-                );
-                $deliveryExecution = $this->getPropertyValue(
-                    $properties,
-                    OntologyLTIDeliveryExecutionLink::PROPERTY_LTI_DEL_EXEC_LINK_EXEC_ID
-                );
+                $user = $this->getPropertyValue($properties, OntologyLTIDeliveryExecutionLink::PROPERTY_LTI_DEL_EXEC_LINK_USER);
+                $link = $this->getPropertyValue($properties, OntologyLTIDeliveryExecutionLink::PROPERTY_LTI_DEL_EXEC_LINK_LINK);
+                $deliveryExecution = $this->getPropertyValue($properties, OntologyLTIDeliveryExecutionLink::PROPERTY_LTI_DEL_EXEC_LINK_EXEC_ID);
 
                 if ($kvDeliveryExecutionService->createDeliveryExecutionLink($user, $link, $deliveryExecution)) {
                     if ($this->getOption('no-delete') !== true) {
                         $instance->delete();
-                        $this->logInfo(
-                            'LtiDeliveryExecution "' . $instance->getUri() . '" deleted from ontology storage.'
-                        );
+                        $this->logInfo('LtiDeliveryExecution "' . $instance->getUri() . '" deleted from ontology storage.');
                     }
                     $this->logNotice('LtiDeliveryExecution "' . $instance->getUri() . '" successfully migrated.');
                     $i++;
@@ -111,15 +94,10 @@ class OntologyLtiDeliveryExecutionToKvMigration extends ScriptAction
             }
             $this->logNotice('LtiDeliveryExecution migrated: ' . $i);
         } catch (\Exception $e) {
-            return \common_report_Report::createFailure(
-                'LtiDeliveryExecution migration has failed with error message : ' . $e->getMessage()
-            );
+            return \common_report_Report::createFailure('LtiDeliveryExecution migration has failed with error message : ' . $e->getMessage());
         }
 
-        return \common_report_Report::createSuccess(
-            'LtiDeliveryExecution successfully has been migrated from Ontology to KV value. '
-                . 'Count of LtiDeliveryExecution migrated: ' . $i
-        );
+        return \common_report_Report::createSuccess('LtiDeliveryExecution successfully has been migrated from Ontology to KV value. Count of LtiDeliveryExecution migrated: ' . $i);
     }
 
 
@@ -201,8 +179,7 @@ class OntologyLtiDeliveryExecutionToKvMigration extends ScriptAction
                 'prefix' => 'nms',
                 'longPrefix' => 'no-migrate-service',
                 'flag' => true,
-                'description' => 'Don\'t migrate the ontology LtiDeliveryExecutionService to '
-                    . 'KvLtiDeliveryExecutionService.',
+                'description' => 'Don\'t migrate the ontology LtiDeliveryExecutionService to KvLtiDeliveryExecutionService.',
             ],
             'no-delete' => [
                 'prefix' => 'nd',

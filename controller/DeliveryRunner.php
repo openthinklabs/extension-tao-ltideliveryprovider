@@ -15,12 +15,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2013-2023 (original work) Open Assessment Technologies SA.
+ * Copyright (c) 2013 (original work) Open Assessment Technologies SA (under the project TAO-PRODUCT);
+ *
+ *
  */
 
 namespace oat\ltiDeliveryProvider\controller;
 
-use oat\ltiDeliveryProvider\model\navigation\Command\GenerateReturnUrlCommand;
 use oat\tao\helpers\UrlHelper;
 use oat\tao\model\theme\ThemeServiceInterface;
 use oat\taoDelivery\controller\DeliveryServer;
@@ -35,7 +36,6 @@ use oat\taoLti\models\classes\LtiMessages\LtiErrorMessage;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDelivery\model\execution\StateServiceInterface;
 use oat\ltiDeliveryProvider\model\navigation\LtiNavigationService;
-use oat\taoQtiTest\model\Service\ConcurringSessionService;
 
 /**
  * Called by the DeliveryTool to override DeliveryServer settings
@@ -47,7 +47,7 @@ use oat\taoQtiTest\model\Service\ConcurringSessionService;
 class DeliveryRunner extends DeliveryServer
 {
     use LtiModuleTrait;
-
+    
     /**
      * Defines if the top and bottom action menu should be displayed or not
      *
@@ -65,7 +65,6 @@ class DeliveryRunner extends DeliveryServer
     protected function getReturnUrl()
     {
         $deliveryExecution = $this->getCurrentDeliveryExecution();
-
         return _url(
             'ltiReturn',
             'DeliveryRunner',
@@ -76,38 +75,10 @@ class DeliveryRunner extends DeliveryServer
 
     public function ltiReturn()
     {
-        $isFeedback = false;
-        $queryString = [];
-        $concurringService = $this->getConcurringSessionService();
         $navigation = $this->getServiceLocator()->get(LtiNavigationService::SERVICE_ID);
         $deliveryExecution = $this->getCurrentDeliveryExecution();
         $launchData = LtiService::singleton()->getLtiSession()->getLaunchData();
-
-        if ($concurringService->isConcurringSession($deliveryExecution)) {
-            $isFeedback = true;
-            $queryString = [
-                'reason' => 'concurrent-test'
-            ];
-            $concurringService->clearConcurringSession($deliveryExecution);
-        }
-
-        $redirectUrl = $navigation->generateReturnUrl(
-            new GenerateReturnUrlCommand(
-                $launchData,
-                $deliveryExecution,
-                $isFeedback,
-                $queryString
-            )
-        );
-        \common_Logger::i(
-            sprintf(
-                'Redirected from the deliveryExecution %s to %s',
-                $deliveryExecution->getIdentifier(),
-                $redirectUrl
-            )
-        );
-
-        $this->redirect($redirectUrl);
+        $this->redirect($navigation->getReturnUrl($launchData, $deliveryExecution));
     }
 
     /**
@@ -141,7 +112,9 @@ class DeliveryRunner extends DeliveryServer
                 $remoteLink,
                 $user
             );
-            $this->getConcurringSessionService()->pauseActiveDeliveryExecutionsForUser($newExecution);
+            $deliveryExecutionStateService = $this->getServiceLocator()->get(StateServiceInterface::SERVICE_ID);
+            $deliveryExecutionStateService->pause($newExecution);
+
             $runDeliveryExecutionUrl = $this->getServiceLocator()->get(UrlHelper::class)->buildUrl(
                 'runDeliveryExecution',
                 null,
@@ -166,32 +139,23 @@ class DeliveryRunner extends DeliveryServer
     public function thankYou()
     {
         $launchData = LtiService::singleton()->getLtiSession()->getLaunchData();
-
+        
         if ($launchData->hasVariable(LtiLaunchData::TOOL_CONSUMER_INSTANCE_NAME)) {
             $this->setData('consumerLabel', $launchData->getVariable(LtiLaunchData::TOOL_CONSUMER_INSTANCE_NAME));
         } elseif ($launchData->hasVariable(LtiLaunchData::TOOL_CONSUMER_INSTANCE_DESCRIPTION)) {
-            $this->setData(
-                'consumerLabel',
-                $launchData->getVariable(LtiLaunchData::TOOL_CONSUMER_INSTANCE_DESCRIPTION)
-            );
+            $this->setData('consumerLabel', $launchData->getVariable(LtiLaunchData::TOOL_CONSUMER_INSTANCE_DESCRIPTION));
         }
-
+        
         if ($launchData->hasReturnUrl()) {
             $this->setData('returnUrl', $launchData->getReturnUrl());
         }
-
+        
         if ($launchData->hasVariable(DeliveryTool::PARAM_THANKYOU_MESSAGE)) {
             $this->setData('message', $launchData->getVariable(DeliveryTool::PARAM_THANKYOU_MESSAGE));
         }
-
+        
         $this->setData('allowRepeat', false);
         $this->setView('learner/thankYou.tpl');
-    }
-
-    public function feedback(): void
-    {
-        $this->setData('reason', $this->getRequestParameter('reason'));
-        $this->setView('learner/feedback.tpl');
     }
 
     /**
@@ -209,14 +173,7 @@ class DeliveryRunner extends DeliveryServer
                 $stateService->finish($deliveryExecution);
             }
         }
-        $redirectUrl = $deliveryExecution
-            ? $this->getServiceLocator()->get(LTIDeliveryTool::class)->getFinishUrl($deliveryExecution)
-            : $this->getReturnUrl();
+        $redirectUrl = $this->getServiceLocator()->get(LTIDeliveryTool::class)->getFinishUrl($deliveryExecution);
         $this->redirect($redirectUrl);
-    }
-
-    private function getConcurringSessionService(): ConcurringSessionService
-    {
-        return $this->getPsrContainer()->get(ConcurringSessionService::class);
     }
 }

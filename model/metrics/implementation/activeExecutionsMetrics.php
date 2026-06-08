@@ -27,6 +27,7 @@ use oat\tao\model\metrics\implementations\abstractMetrics;
 
 class activeExecutionsMetrics extends abstractMetrics
 {
+
     /**
      * Collect values, caches
      * @param bool $force

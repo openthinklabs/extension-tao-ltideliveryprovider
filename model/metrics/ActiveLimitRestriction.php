@@ -29,7 +29,8 @@ use oat\tao\model\metrics\MetricsService;
 
 class ActiveLimitRestriction extends BasicRestriction
 {
-    public const METRIC = activeExecutionsMetrics::class;
+
+    const METRIC = activeExecutionsMetrics::class;
 
     /**
      * @param $value

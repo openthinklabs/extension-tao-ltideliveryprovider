@@ -33,6 +33,7 @@ use oat\ltiDeliveryProvider\model\execution\LtiDeliveryExecutionService;
  */
 class AttemptService extends \oat\taoDelivery\model\AttemptService
 {
+
     /**
      * @inheritdoc
      */
@@ -42,11 +43,7 @@ class AttemptService extends \oat\taoDelivery\model\AttemptService
         if ($currentSession instanceof TaoLtiSession) {
             $executionService = $this->getServiceManager()->get(LtiDeliveryExecutionService::SERVICE_ID);
             $delivery = new \core_kernel_classes_Resource($deliveryId);
-            $executions = $executionService->getLinkedDeliveryExecutions(
-                $delivery,
-                $currentSession->getLtiLinkResource(),
-                $user->getIdentifier()
-            );
+            $executions = $executionService->getLinkedDeliveryExecutions($delivery, $currentSession->getLtiLinkResource(), $user->getIdentifier());
             return $this->filterStates($executions);
         } else {
             return parent::getAttempts($deliveryId, $user);

@@ -91,9 +91,7 @@ class LtiResultAliasStorageTest extends TestCase
     protected function getService()
     {
         $persistenceManager = $this->getSqlMock('test_LtiResultIdStorageTest');
-        (new \oat\ltiDeliveryProvider\scripts\install\RegisterLtiResultAliasStorage())->createTable(
-            $persistenceManager->getPersistenceById('test_LtiResultIdStorageTest')
-        );
+        (new \oat\ltiDeliveryProvider\scripts\install\RegisterLtiResultAliasStorage())->createTable($persistenceManager->getPersistenceById('test_LtiResultIdStorageTest'));
         $storage = new LtiResultAliasStorage([
             LtiResultAliasStorage::OPTION_PERSISTENCE => 'test_LtiResultIdStorageTest'
         ]);
